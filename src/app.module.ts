@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigService, ConfigModule } from '@nestjs/config';
 import envConfig  from '../config/env';
 import { PostsEntity } from './posts/posts.entity';
+import { LoggerService } from './logger/logger.service';
 
 @Module({
   imports: [
@@ -34,6 +35,6 @@ import { PostsEntity } from './posts/posts.entity';
     PostsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, LoggerService],
 })
 export class AppModule {}

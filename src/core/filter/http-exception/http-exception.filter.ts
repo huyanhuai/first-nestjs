@@ -1,12 +1,20 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException } from '@nestjs/common';
+import { LoggerService } from '../../../logger/logger.service';
 
 @Catch(HttpException)
 export class HttpExceptionFilter<T> implements ExceptionFilter {
+  constructor(private readonly logger: LoggerService) {} // 注入 LoggerService，引入日志服务
+  
   catch(exception: HttpException, host: ArgumentsHost) {
     const ctx = host.switchToHttp(); // 获取请求上下文
     const response = ctx.getResponse(); // 获取请求上下文中的 response对象
+    const request = ctx.getRequest(); // 获取请求上下文中的 request对象
     const status = exception.getStatus(); // 获取异常状态码
     const exceptionResponse: any = exception.getResponse();
+
+    // 获取请求的更多信息
+    const { method, url, params, query, body, headers } = request;
+
     let validMessage = '';
 
     if (typeof exceptionResponse === 'object') {
@@ -28,5 +36,24 @@ export class HttpExceptionFilter<T> implements ExceptionFilter {
     response.status(status);
     response.header('Content-Type', 'application/json; charset=utf-8');
     response.send(errorResponse);
+
+    // 记录请求信息
+    this.logger.log('请求信息', {
+      method,
+      url,
+      params,
+      query,
+      body,
+      headers,
+    })
+
+    // 记录请求的响应时间和状态
+    this.logger.log('响应信息', {
+      url,
+      method,
+      statusCode: status,
+      message: validMessage || message,
+      ...errorResponse
+    })
   }
 }

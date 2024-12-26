@@ -4,6 +4,7 @@ import { HttpExceptionFilter } from './core/filter/http-exception/http-exception
 import { TransformInterceptor } from './core/interceptor/transform/transform.interceptor';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ValidationPipe  } from '@nestjs/common';
+import { LoggerService } from './logger/logger.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -14,10 +15,12 @@ async function bootstrap() {
   //   origin: '<http://example.com>', // 只有来自 <http://example.com> 的请求才被允许
   // });
 
+  // 注册全局 logger 拦截器
+  const loggerService = app.get(LoggerService);
   // 注册全局错误的过滤器
-  app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalFilters(new HttpExceptionFilter(loggerService));
   // 注册全局拦截器
-  app.useGlobalInterceptors(new TransformInterceptor());
+  app.useGlobalInterceptors(new TransformInterceptor(loggerService));
 
   // 注册全局验证管道
   app.useGlobalPipes(new ValidationPipe());
