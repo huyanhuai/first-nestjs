@@ -7,6 +7,7 @@ import { ConfigService, ConfigModule } from '@nestjs/config';
 import envConfig  from '../config/env';
 import { PostsEntity } from './posts/posts.entity';
 import { LoggerService } from './logger/logger.service';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -20,19 +21,21 @@ import { LoggerService } from './logger/logger.service';
       useFactory: async (configService: ConfigService) => {
         return {
           type: 'mysql', // 数据库类型
-          // autoLoadEntities: true, // 自动加载模块
-          entities: [PostsEntity],  // 数据表实体，synchronize为true时，自动创建表，生产环境建议关闭
+          autoLoadEntities: true, // 自动加载模块
+          // entities: [__dirname + '/**/*.entity{.ts,.js}'],
+          // entities: [PostsEntity],  // 数据表实体，synchronize为true时，自动创建表，生产环境建议关闭
           hhost: configService.get('DB_HOST'), // 主机，默认为localhost
           port: configService.get<number>('DB_PORT'), // 端口号
           username: configService.get('DB_USER'), // 用户名
           password: configService.get('DB_PASSWD'), // 密码
           database: configService.get('DB_DATABASE'), //数据库名
           timezone: '+08:00', //服务器上配置的时区
-          synchronize: false, //根据实体自动创建数据库表， 生产环境建议关闭
+          synchronize: true, //根据实体自动创建数据库表， 生产环境建议关闭
         }
       }
     }),
     PostsModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService, LoggerService],
