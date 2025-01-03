@@ -8,6 +8,11 @@ import envConfig  from '../config/env';
 import { PostsEntity } from './posts/posts.entity';
 import { LoggerService } from './logger/logger.service';
 import { UserModule } from './user/user.module';
+import { PassportModule } from '@nestjs/passport';
+// import { LocalStrategy } from './user/local/local.strategy';
+import { User } from './user/entities/user.entity';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './user/jwt/jwt.guard';
 
 @Module({
   imports: [
@@ -36,8 +41,10 @@ import { UserModule } from './user/user.module';
     }),
     PostsModule,
     UserModule,
+    TypeOrmModule.forFeature([User]),
+    PassportModule 
   ],
   controllers: [AppController],
-  providers: [AppService, LoggerService],
+  providers: [AppService, LoggerService, { provide: APP_GUARD, useClass: JwtAuthGuard }],
 })
 export class AppModule {}

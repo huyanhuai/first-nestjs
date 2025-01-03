@@ -39,6 +39,8 @@ export class User {
 
     @BeforeInsert()
     async encryptPwd() {
+        console.log('password', this.password);
+        
         /**
          * 加密处理 - 同步方法
          * bcryptjs.hashSync(data, salt)

@@ -6,6 +6,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, IStrategyOptions } from 'passport-local';
 import { User } from '../entities/user.entity';
 
+// 身份验证策略
 export class LocalStrategy extends PassportStrategy(Strategy) {
     constructor(
         @InjectRepository(User)
