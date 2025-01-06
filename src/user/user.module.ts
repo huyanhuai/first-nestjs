@@ -7,6 +7,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { LocalStrategy } from './local/local.strategy';
 import { JwtStrategy } from './jwt/jwt.strategy';
+import { RedisModule } from '../redis/redis.module'; // 添加RedisModule
 
 // jwt 生成token
 // 注册JwtModule
@@ -23,7 +24,7 @@ const jwtModule = JwtModule.registerAsync({
 });
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), jwtModule],
+  imports: [TypeOrmModule.forFeature([User]), jwtModule, RedisModule],
   controllers: [UserController],
   providers: [UserService, LocalStrategy, JwtStrategy],
   exports: [jwtModule],
