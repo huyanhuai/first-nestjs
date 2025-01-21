@@ -1,6 +1,7 @@
-import { Entity, Column, PrimaryGeneratedColumn, BeforeInsert } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, BeforeInsert, OneToMany } from 'typeorm';
 import * as bcryptjs from 'bcryptjs';
 import { Exclude } from 'class-transformer';
+import { PostsEntity } from '../../posts/posts.entity';
 
 @Entity('user')
 export class User {
@@ -22,6 +23,9 @@ export class User {
 
     @Column('simple-enum', { enum: ['root', 'author', 'visitor'] })
     role: string; // 角色
+
+    @OneToMany(() => PostsEntity, (post) => post.author)
+    posts: PostsEntity[]; 
 
     @Column({
         name: 'create_time',

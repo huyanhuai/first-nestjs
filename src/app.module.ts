@@ -13,6 +13,8 @@ import { PassportModule } from '@nestjs/passport';
 import { User } from './user/entities/user.entity';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './user/jwt/jwt.guard';
+import { CategoryModule } from './category/category.module';
+import { TagModule } from './tag/tag.module';
 
 @Module({
   imports: [
@@ -42,7 +44,9 @@ import { JwtAuthGuard } from './user/jwt/jwt.guard';
     PostsModule,
     UserModule,
     TypeOrmModule.forFeature([User]),
-    PassportModule 
+    PassportModule,
+    CategoryModule,
+    TagModule 
   ],
   controllers: [AppController],
   providers: [AppService, LoggerService, { provide: APP_GUARD, useClass: JwtAuthGuard }],

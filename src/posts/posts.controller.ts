@@ -1,7 +1,9 @@
 import { PostsService, PostsRo } from './posts.service';
-import { Controller, Get, Post, Body, Param, Delete, Put, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { CreatePostDto } from '../dto/create-post.dto';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard, Roles } from '../user/role.guard';
 
 @ApiTags('文章')
 @Controller('post')
@@ -13,9 +15,12 @@ export class PostsController {
      * @param post
      */
     @ApiOperation({ summary: '创建文章' })
+    @ApiBearerAuth()
     @Post('/create')
-    async create(@Body() post: CreatePostDto) {
-        return await this.postsService.create(post);
+    @Roles('admin', 'root')
+    @UseGuards(AuthGuard('jwt'), RolesGuard)
+    async create(@Body() post: CreatePostDto, @Req() req) {
+        return await this.postsService.create(req.user, post);
     }
 
     /**

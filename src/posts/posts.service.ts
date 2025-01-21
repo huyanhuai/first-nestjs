@@ -16,7 +16,7 @@ export class PostsService {
     ) {}
 
     // 创建文章
-    async create(post: Partial<PostsEntity>): Promise<PostsEntity> {
+    async create(user, post: Partial<PostsEntity>): Promise<PostsEntity> {
         const { title } = post;
         if (!title) {
             throw new HttpException('缺少标题', 401);
@@ -25,6 +25,17 @@ export class PostsService {
         if (doc) {
           throw new HttpException('文章已存在', 401);
         }
+        let { status, isRecommend, coverUrl } = post;
+        const postParam: Partial<PostsEntity> = { 
+            ...post,
+            isRecommend: isRecommend ? 1 : 0,
+            author: user 
+        };
+        // 判断状态，为publish则设置发布时间
+        if (status === 'publish') {
+            Object.assign(postParam, { publishTime: new Date() });
+        }
+        
         return await this.postsRepository.save(post);
     }
 
