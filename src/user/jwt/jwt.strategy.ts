@@ -18,7 +18,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         private readonly redisService: RedisService
     ) {
         super({
-            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+            // jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(), // 默认从Authorization中获取token
+            jwtFromRequest: ExtractJwt.fromHeader('token'), // 从请求头中获取token
             ignoreExpiration: false,
             secretOrKey: configService.get('JWT_SECRET'),
             passReqToCallback: true // 允许将请求对象作为第一个参数传递到验证回调函数
@@ -27,7 +28,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     
     async validate(req, user: User): Promise<User> {
         console.log('user', user);
-        const token = ExtractJwt.fromAuthHeaderAsBearerToken()(req)
+        // const token = ExtractJwt.fromAuthHeaderAsBearerToken()(req)
+        const token = req.get('token');
+        console.log('token', token);
+        
         const cacheToken  = await this.redisService.get(`${user.id}&${user.username}`);
         if (!cacheToken) {
             throw new UnauthorizedException('token已过期');

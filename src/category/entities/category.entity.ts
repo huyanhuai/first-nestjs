@@ -10,7 +10,7 @@ export class CategoryEntity {
     name: string;
 
     @OneToMany(() => PostsEntity, post => post.category)
-    posts: PostsEntity[];
+    posts: Array<PostsEntity>;
 
     @CreateDateColumn({
         name: 'create_time',

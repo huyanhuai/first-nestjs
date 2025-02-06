@@ -1,13 +1,14 @@
-import { ExecutionContext, Injectable } from '@nestjs/common';
+import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { Observable } from 'rxjs';
 import { IS_PUBLIC_KEY } from '../../common/public.decorator';
+import { JwtService } from '@nestjs/jwt';
 
 // 用于全局守卫，将未携带 token 的接口进行拦截
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
-  constructor(private reflector: Reflector) {
+  constructor(private reflector: Reflector, private jwtService: JwtService) {
     super();
   }
 
@@ -20,6 +21,12 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     if (isPublic) {
       return true;
     }
+    const request = context.switchToHttp().getRequest();
+    const accessToken = request.headers['token'];
+    if (!accessToken) throw new UnauthorizedException('请先登录');
+    const decode = this.jwtService.decode(accessToken); // 解析token
+    if (!decode) throw new UnauthorizedException('token不正确');
+    
     return super.canActivate(context);
   }
 }

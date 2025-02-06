@@ -1,6 +1,7 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
 import { map, Observable, tap } from 'rxjs';
 import { LoggerService } from '../../../logger/logger.service';
+import * as moment from 'moment';
 
 @Injectable()
 export class TransformInterceptor implements NestInterceptor {
@@ -10,6 +11,7 @@ export class TransformInterceptor implements NestInterceptor {
     const now = Date.now();
     const request = context.switchToHttp().getRequest();
     const { method, url, params, query, body, headers } = request;
+    const dates = ['createTime', 'updateTime', 'publishTime']
 
     // 记录请求的基本信息
     this.logger.log('请求信息', {
@@ -30,16 +32,29 @@ export class TransformInterceptor implements NestInterceptor {
           method,
           statusCode: data?.statusCode || 200, // 默认 200 状态码
           responseTime: `${Date.now() - now}ms`,
-          code: 0,
+          code: 200,
           message: '请求成功',
         });
       }),
 
-      map(data => ({
-        code: 0,
-        data,
-        message: '请求成功',
-      }))
+      map(data => {
+        const obj = data
+        if (obj && typeof obj === 'object' && obj !== null) {
+          for (const key in obj) {
+            if (obj.hasOwnProperty(key)) {
+              const value = obj[key];
+              if (dates.includes(key)) {
+                obj[key] = moment(value).format('YYYY-MM-DD HH:mm:ss')
+              }
+            }
+          }
+        }
+        return {
+          code: 200,
+          data: obj,
+          message: '请求成功',
+        }
+      })
     );
   }
 }

@@ -16,7 +16,7 @@ export class CategoryService {
     return await this.categoryRepository.save({ name });
   }
 
-  async findOne(id: number) {
+  async findById(id: number) {
     return await this.categoryRepository.findOne({ where: { id } });
   }
 }

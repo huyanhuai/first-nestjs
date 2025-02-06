@@ -4,6 +4,7 @@ import { Exclude } from 'class-transformer';
 import { User } from "../user/entities/user.entity";
 import { CategoryEntity } from "../category/entities/category.entity";
 import { TagEntity } from "../tag/entities/tag.entity";
+import { PostInfoDto } from "./dto/create-post.dto";
 
 @Entity("posts")
 export class PostsEntity {
@@ -58,9 +59,28 @@ export class PostsEntity {
     @Column({type: 'timestamp', name: 'publish_time', default: null})
     publishTime: Date;
 
-    @Column({type: 'timestamp', default: () => "CURRENT_TIMESTAMP"})
-    create_time: Date
+    @Column({type: 'timestamp', name: 'create_time', default: () => "CURRENT_TIMESTAMP"})
+    createTime: Date;
 
-    @Column({type: 'timestamp', default: () => "CURRENT_TIMESTAMP"})
-    update_time: Date
+    @Column({type: 'timestamp', name: 'update_time', default: () => "CURRENT_TIMESTAMP"})
+    updateTime: Date;
+
+    toResponseObject(): PostInfoDto {
+        let responseObj: PostInfoDto = {
+            ...this,
+            isRecommend: this.isRecommend ? true : false,
+        }
+        if (this.author && this.author.id) {
+            responseObj.author = this.author.nickname || this.author.username;
+            responseObj.userId = this.author.id;
+        }
+        if (this.category) {
+            responseObj.category = this.category.name;
+        }
+        if (this.tags && this.tags.length > 0) {
+            responseObj.tags = this.tags.map(tag => tag.name);
+        }
+
+        return responseObj;
+    }
 }

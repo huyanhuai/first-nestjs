@@ -11,7 +11,7 @@ export class TagEntity {
     name: string;
 
     @ManyToMany(() => PostsEntity, post => post.tags)
-    posts: PostsEntity[];
+    posts: Array<PostsEntity>;
 
     @CreateDateColumn({
         name: 'create_time',

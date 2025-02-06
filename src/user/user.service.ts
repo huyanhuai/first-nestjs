@@ -41,10 +41,10 @@ export class UserService {
       throw new HttpException('用户名或密码错误', HttpStatus.BAD_REQUEST);
     }
     const token = this.createToken({ username: user.username, id: user.id })
-    await this.redisService.set(`${user.id}&${user.username}`, token, 1800);
+    await this.redisService.set(`${user.id}&${user.username}`, token, 24*60*60);
     const obj: any = {
       ...user,
-      token: 'Bearer ' + token
+      token
     }
     return obj;
   }

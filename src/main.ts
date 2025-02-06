@@ -5,6 +5,7 @@ import { TransformInterceptor } from './core/interceptor/transform/transform.int
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ValidationPipe  } from '@nestjs/common';
 import { LoggerService } from './logger/logger.service';
+import { knife4jSetup } from 'nest-knife4j'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -34,7 +35,14 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api-docs', app, document);
-    
+  knife4jSetup(app, [
+    {
+      name: '2.X版本',
+      url: `/api-docs-json`,
+      swaggerVersion: '2.0',
+      location: `/api-docs-json`,
+    },
+  ])
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

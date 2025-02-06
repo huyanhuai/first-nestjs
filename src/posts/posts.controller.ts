@@ -1,9 +1,10 @@
 import { PostsService, PostsRo } from './posts.service';
 import { Controller, Get, Post, Body, Param, Delete, Put, Query, Req, UseGuards } from '@nestjs/common';
-import { CreatePostDto } from '../dto/create-post.dto';
+import { CreatePostDto } from './dto/create-post.dto';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard, Roles } from '../user/role.guard';
+import { Public } from 'src/common/public.decorator';
 
 @ApiTags('文章')
 @Controller('post')
@@ -28,6 +29,7 @@ export class PostsController {
      * @param query
      */
     @ApiOperation({ summary: '获取文章列表' })
+    @Public()
     @Get('/list')
     async findAll(@Query() query): Promise<PostsRo> {
         return await this.postsService.findAll(query);
