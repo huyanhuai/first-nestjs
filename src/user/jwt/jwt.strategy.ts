@@ -27,10 +27,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
     
     async validate(req, user: User): Promise<User> {
-        console.log('user', user);
+        // console.log('user', user);
         // const token = ExtractJwt.fromAuthHeaderAsBearerToken()(req)
         const token = req.get('token');
-        console.log('token', token);
+        // console.log('token', token);
         
         const cacheToken  = await this.redisService.get(`${user.id}&${user.username}`);
         if (!cacheToken) {

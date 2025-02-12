@@ -32,6 +32,7 @@ export class PostsService {
         }
 
         let { status, isRecommend, coverUrl, tag, category = 0 } = post;
+        
         // 根据分类id获取分类
         const categoryDoc = await this.categoryService.findById(category);
         // 根据传入的标签id,如 `1,2`,获取标签
@@ -66,8 +67,17 @@ export class PostsService {
         qb.where('1 = 1');
         qb.orderBy('post.createTime', 'DESC');
 
-        const count = await qb.getCount();
         const { pageNum = 1, pageSize = 10, ...params } = query;
+        // 根据传入的参数构建查询
+        if (params.category) {
+            qb.where('post.category = :category', { category: params.category });
+        }
+        if (params.tag) {
+            // 多个tag查询
+            let tag = ('' + params.tag).split(',');
+            qb.andWhere('tag.id IN (:...tag)', { tag });
+        }
+        const count = await qb.getCount();
         qb.limit(pageSize);
         qb.offset(pageSize * (pageNum - 1));
 
@@ -91,18 +101,40 @@ export class PostsService {
     }
 
     // 获取指定文章
-    async findById(id): Promise<PostsEntity> {
-        return await this.postsRepository.findOne({ where: { id } });
+    async findById(id): Promise<PostInfoDto> {
+        const qb = await this.postsRepository.createQueryBuilder('post')
+        .leftJoinAndSelect('post.author', 'user')
+        .leftJoinAndSelect('post.category', 'category')
+        .leftJoinAndSelect('post.tags', 'tag')
+        .where('post.id = :id', { id });
+        
+        const result = await qb.getOne();
+        if (!result) {
+            throw new HttpException(`id为${id}的文章不存在`, 401);
+        }
+        await this.postsRepository.update({ id }, {count: result.count + 1}); // 更新阅读量
+        return result.toResponseObject();
     }
 
     // 更新文章
-    async updateById(id, post: Partial<PostsEntity>): Promise<PostsEntity> {
+    async updateById(id, post): Promise<number> {
         const existPost  = await this.postsRepository.findOne({ where: { id } });
         if (!existPost) {
             throw new HttpException(`id为${id}的文章不存在`, 401);
         }
-        const updatePost = this.postsRepository.merge(existPost, post);
-        return await this.postsRepository.save(updatePost);
+
+        const { tag, category, status } = post;
+        const tags = await this.tagService.findByIds(('' + tag).split(','));
+        const categoryDoc = await this.categoryService.findById(category);
+        const newPost  = {
+            ...post,
+            isRecommend: post.isRecommend ? 1 : 0,
+            tags,
+            category: categoryDoc,
+            publishTime: status === 'publish' ? new Date() : existPost.publishTime,
+        }
+        const updatePost = this.postsRepository.merge(existPost, newPost);
+        return (await this.postsRepository.save(updatePost)).id;
     }
 
     // 删除文章

@@ -19,7 +19,7 @@ export class CreatePostDto {
     @ApiProperty({ description: '文章状态' })
     readonly status: string;
 
-    @IsNumber()
+    @IsNumber({}, { message: '文章分类必须为数字' })
     @ApiProperty({ description: '文章分类' })
     readonly category: number;
 
